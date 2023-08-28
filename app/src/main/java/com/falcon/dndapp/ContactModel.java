@@ -1,4 +1,4 @@
-package com.example.dndapp;
+package com.falcon.dndapp;
 
 public class ContactModel {
     String phoneNumber,callTime;

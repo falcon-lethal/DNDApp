@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.dndapp"
+    namespace = "com.falcon.dndapp"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.dndapp"
+        applicationId = "com.falcon.dndapp"
         minSdk = 26
         targetSdk = 33
         versionCode = 1

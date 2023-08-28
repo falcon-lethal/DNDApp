@@ -1,4 +1,4 @@
-package com.example.dndapp;
+package com.falcon.dndapp;
 
 import org.junit.Test;
 
