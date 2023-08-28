@@ -88,7 +88,8 @@ public class RecyclerContactAdapter extends RecyclerView.Adapter<RecyclerContact
 
 
                         try{
-                            SmsManager smsManager=SmsManager.getDefault();
+                            //SmsManager smsManager=SmsManager.getDefault();
+                            SmsManager smsManager=SmsManager.getSmsManagerForSubscriptionId(model.simId);
                             smsManager.sendTextMessage(phoneNo,null,message,null,null);
                             Toast.makeText(context,"Message Sent",Toast.LENGTH_LONG).show();
                             confirmDialog.dismiss();

@@ -107,12 +107,14 @@ public class MainActivity extends AppCompatActivity {
             int dateIndex = cursor.getColumnIndex(CallLog.Calls.DATE);
             int durationIndex = cursor.getColumnIndex(CallLog.Calls.DURATION);
             int typeIndex = cursor.getColumnIndex(CallLog.Calls.TYPE);
+            int simIndex = cursor.getColumnIndex(CallLog.Calls.PHONE_ACCOUNT_ID);
 
             while (cursor.moveToNext()) {
                 String phoneNumber = cursor.getString(numberIndex);
                 long callDate = cursor.getLong(dateIndex);
                 long callDuration = cursor.getLong(durationIndex);
                 int callType = cursor.getInt(typeIndex);
+                int simId=cursor.getInt(simIndex);
 
                 Date date = new Date(callDate);
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 LocalDate localCallDate = LocalDate.ofEpochDay(callDate / (24 * 60 * 60 * 1000));
 
                 if (localCallDate.isAfter(admissibleDate) && callType == CallLog.Calls.INCOMING_TYPE) {
-                    contactModelArrayList.add(new ContactModel(phoneNumber, formattedDate));
+                    contactModelArrayList.add(new ContactModel(phoneNumber, formattedDate,simId));
                 }
 
 
