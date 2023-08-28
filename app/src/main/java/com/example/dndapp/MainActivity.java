@@ -42,10 +42,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import android.content.ContentResolver;
+import android.content.Context;
+
 public class MainActivity extends AppCompatActivity {
 
     ArrayList<ContactModel> contactModelArrayList=new ArrayList<>();
     private static final int READ_CALL_LOG_PERMISSION_REQUEST = 1;
+    private static final int READ_CONTACT_PERMISSION_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +62,17 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_CALL_LOG},
                     READ_CALL_LOG_PERMISSION_REQUEST);
-        } else {
+
+        }
+        else if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission not granted, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    READ_CONTACT_PERMISSION_REQUEST);
+
+        }
+        else {
             // Permission already granted, proceed to read call log
             readCallLog();
         }
@@ -88,6 +102,49 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("CallLogActivity", "Permission denied to read call log");
             }
         }
+        if (requestCode == READ_CONTACT_PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, read call log
+                readCallLog();
+            } else {
+                // Permission denied, handle accordingly
+                Log.e("CallLogActivity", "Permission denied to read call log");
+            }
+        }
+    }
+
+
+
+    public boolean isPhoneNumberInContacts(Context context, String phoneNumber) {
+        // Initialize a ContentResolver
+        ContentResolver contentResolver = context.getContentResolver();
+
+        // Define the projection (columns you want to retrieve)
+        String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+        // Define the selection criteria (phone number)
+        String selection = ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?";
+
+        // Define the selection arguments (the phone number to search for)
+        String[] selectionArgs = {phoneNumber};
+
+        // Query the ContactsContract data to find a match
+        Cursor cursor = contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                null
+        );
+
+        // Check if the cursor contains any results
+        boolean numberExistsInContacts = false;
+        if (cursor != null && cursor.moveToFirst()) {
+            numberExistsInContacts = true; // The phone number exists in contacts
+            cursor.close(); // Close the cursor
+        }
+
+        return numberExistsInContacts;
     }
 
     private void readCallLog() {
@@ -116,20 +173,27 @@ public class MainActivity extends AppCompatActivity {
                 int callType = cursor.getInt(typeIndex);
                 int simId=cursor.getInt(simIndex);
 
-                Date date = new Date(callDate);
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                String formattedDate = sdf.format(date);
+                // Check if the phone number is in contacts
+                boolean isNumberSaved = isPhoneNumberInContacts(this,phoneNumber);
 
-                LocalDate currentDate = LocalDate.now();
-                LocalDate admissibleDate = currentDate.minus(2, ChronoUnit.DAYS);
+                if (!isNumberSaved) {
+                    // This is an unknown/unsaved number, do something with it
 
-                LocalDate localCallDate = LocalDate.ofEpochDay(callDate / (24 * 60 * 60 * 1000));
 
-                if (localCallDate.isAfter(admissibleDate) && callType == CallLog.Calls.INCOMING_TYPE) {
-                    contactModelArrayList.add(new ContactModel(phoneNumber, formattedDate,simId));
+                    Date date = new Date(callDate);
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    String formattedDate = sdf.format(date);
+
+                    LocalDate currentDate = LocalDate.now();
+                    LocalDate admissibleDate = currentDate.minus(2, ChronoUnit.DAYS);
+
+                    LocalDate localCallDate = LocalDate.ofEpochDay(callDate / (24 * 60 * 60 * 1000));
+
+                    if (localCallDate.isAfter(admissibleDate) && callType == CallLog.Calls.INCOMING_TYPE) {
+                        contactModelArrayList.add(new ContactModel(phoneNumber, formattedDate, simId));
+                    }
+
                 }
-
-
 //
 //                LocalDate currentDate = LocalDate.now();
 //                LocalDate admissibleDate = currentDate.minus(2, ChronoUnit.DAYS);
