@@ -168,14 +168,13 @@ public class MainActivity extends AppCompatActivity {
                     String formattedDate = sdf.format(date);
 
                     LocalDate currentDate = LocalDate.now();
-                    LocalDate admissibleDate = currentDate.minus(2, ChronoUnit.DAYS);
+                    LocalDate admissibleDate = currentDate.minus(3, ChronoUnit.DAYS);
 
                     LocalDate localCallDate = LocalDate.ofEpochDay(callDate / (24 * 60 * 60 * 1000));
 
                     if (localCallDate.isAfter(admissibleDate) && callType == CallLog.Calls.INCOMING_TYPE) {
                         contactModelArrayList.add(new ContactModel(phoneNumber, formattedDate, simId));
                     }
-
                 }
 //
 //                LocalDate currentDate = LocalDate.now();
